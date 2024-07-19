@@ -13,7 +13,7 @@ class Main:
     def initialize(self):
         pass
 
-    def load_rom(self, filename):
+    def load_rom(self):
         pass
 
     def dispatch_events(self):
