@@ -10,6 +10,7 @@
 # | **** | 11110000 | 0xF0 |
 # +------+----------+------+
 
+
 class Font:
     def __init__(self):
         # sprites in memory for the 16 hexadecimal digits

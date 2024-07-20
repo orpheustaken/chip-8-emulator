@@ -23,6 +23,7 @@
 # |  interpreter  |
 # +---------------+= 0x000 (0) start of Chip-8 RAM
 
+
 class Memory:
     def __init__(self):
         # CHIP-8 supports 4kb of ram

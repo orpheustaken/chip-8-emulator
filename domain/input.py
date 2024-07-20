@@ -10,6 +10,7 @@
 # | A | 0 | B | F |
 # +---+---+---+---+
 
+
 class Input:
     def __init__(self):
         # 16-key hexadecimal keypad for input
