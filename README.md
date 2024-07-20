@@ -3,6 +3,8 @@
   <p>CHIP-8 interpreter written in Python</p>
 </div>
 
+[![Black](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/ambv/black)
+
 Writing this project as I learn more about emulators and practice Python.
 
 Documentation
