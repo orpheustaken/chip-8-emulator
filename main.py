@@ -11,7 +11,7 @@ from domain.window import Window
 
 logging.basicConfig(
     filename="chip-8-emulator.log",
-    filemode="w",  # 'a' for append, 'w' for overwrite
+    filemode="a",  # 'a' for append, 'w' for overwrite
     level=logging.INFO,  # level of logging
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
@@ -31,7 +31,7 @@ class Main:
 
         while not self.has_exit:
             self.app_window.dispatch_events()
-            self.app_cpu.cycle()
+            self.app_cpu.cycle(self.app_memory, self.app_window, self.app_output)
             self.app_window.on_draw()
 
     def load_rom(self, rom):
