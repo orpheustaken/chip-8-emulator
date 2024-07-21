@@ -23,6 +23,25 @@ class Window(pyglet.window.Window):
         # TODO: update screen only when needed
         self.should_draw = True
 
+        self.KEY_MAP = {
+            pyglet.window.key._1: 0x1,
+            pyglet.window.key._2: 0x2,
+            pyglet.window.key._3: 0x3,
+            pyglet.window.key._4: 0xC,
+            pyglet.window.key.Q: 0x4,
+            pyglet.window.key.W: 0x5,
+            pyglet.window.key.E: 0x6,
+            pyglet.window.key.R: 0xD,
+            pyglet.window.key.A: 0x7,
+            pyglet.window.key.S: 0x8,
+            pyglet.window.key.D: 0x9,
+            pyglet.window.key.F: 0xE,
+            pyglet.window.key.Z: 0xA,
+            pyglet.window.key.X: 0,
+            pyglet.window.key.C: 0xB,
+            pyglet.window.key.V: 0xF,
+        }
+
     def on_draw(self):
         if self.should_draw:
             self.clear()
