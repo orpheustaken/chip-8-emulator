@@ -1,5 +1,6 @@
 import sys
 import os
+import logging
 
 from domain.cpu import CPU
 from domain.font import Font
@@ -8,38 +9,53 @@ from domain.memory import Memory
 from domain.output import Output
 from domain.window import Window
 
+logging.basicConfig(
+    filename="chip-8-emulator.log",
+    filemode="a",  # 'a' for append, 'w' for overwrite
+    level=logging.INFO,  # level of logging
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
 
 class Main:
     def __init__(self):
-        app_cpu = CPU()
-        app_font = Font()
-        app_input = Input()
-        app_memory = Memory()
-        app_output = Output()
-        app_window = Window(800, 600, "CHIP-8")
+        self.app_cpu = CPU()
+        self.app_font = Font()
+        self.app_input = Input()
+        self.app_memory = Memory()
+        self.app_output = Output()
+        self.app_window = Window(800, 600, "CHIP-8")
 
         self.load_rom(sys.argv[1])
         self.load_fonts()
 
         while not self.has_exit:
-            app_window.dispatch_events()
-            app_cpu.cycle()
-            app_window.run()
+            self.app_window.dispatch_events()
+            self.app_cpu.cycle()
+            self.app_window.on_draw()
 
-    @staticmethod
-    def load_rom(rom):
-        # if os.path.exists(rom):
-        pass
+    def load_rom(self, rom):
+        if os.path.isfile(rom):
+            logging.info("Loading %s..." % rom)
+        with open(rom, "rb") as file:
+            rom_binary = file.read()
+
+        # TODO: add try-catch for memory limit reached
+        for i in range(len(rom_binary)):
+            self.app_memory.memory[i + 0x200] = rom_binary[i]
+        else:
+            print("ROM path is not valid")
+            exit(2)
 
     def load_fonts(self):
-        pass
+        for font in self.app_font.fonts.values():
+            self.app_memory.memory.append(font)
 
     def has_exit(self):
         pass
 
-    @staticmethod
-    def run():
-        Window.run()
+    def run(self):
+        self.app_window.run()
 
 
 if __name__ == "__main__":
