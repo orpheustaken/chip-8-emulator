@@ -36,18 +36,23 @@ class Main:
 
     def load_rom(self, rom):
         if os.path.isfile(rom):
-            logging.info("Loading %s..." % rom)
+            logging.info("Loading ROM image %s into the emulator's memory..." % rom)
+
             with open(rom, "rb") as file:
                 rom_binary = file.read()
 
             # TODO: add try-catch for memory limit reached
             for i in range(len(rom_binary)):
                 self.app_memory.memory[i + 0x200] = rom_binary[i]
+
+            logging.info("ROM image loaded successfully")
         else:
-            print("ROM path is not valid")
+            print("ROM image path is not valid")
             exit(2)
 
     def load_fonts(self):
+        logging.info("Loading fonts into the emulator's memory")
+
         for font in self.app_font.fonts.values():
             self.app_memory.memory.append(font)
 
@@ -55,13 +60,14 @@ class Main:
         pass
 
     def run(self):
+        logging.info("Starting CHIP-8 window...")
         self.app_window.run()
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("ROM must be provided to be run by the CHIP-8 interpreter")
-        print("Usage: main.py <rom_path>")
+        print("ROM image must be provided to be run by the CHIP-8 interpreter")
+        print("Usage: main.py <rom_img_path>")
         exit(1)
 
     app = Main()
