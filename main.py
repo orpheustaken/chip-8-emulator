@@ -37,12 +37,12 @@ class Main:
     def load_rom(self, rom):
         if os.path.isfile(rom):
             logging.info("Loading %s..." % rom)
-        with open(rom, "rb") as file:
-            rom_binary = file.read()
+            with open(rom, "rb") as file:
+                rom_binary = file.read()
 
-        # TODO: add try-catch for memory limit reached
-        for i in range(len(rom_binary)):
-            self.app_memory.memory[i + 0x200] = rom_binary[i]
+            # TODO: add try-catch for memory limit reached
+            for i in range(len(rom_binary)):
+                self.app_memory.memory[i + 0x200] = rom_binary[i]
         else:
             print("ROM path is not valid")
             exit(2)
