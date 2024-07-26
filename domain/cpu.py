@@ -96,10 +96,10 @@ class CPU:
         except KeyError:
             print("Unknown instruction: %X" % self.opcode)
 
-    def _0ZZ0(self, output):
+    def _0ZZ0(self, app_output, app_window):
         logging.debug("Clears the screen")
-        output.display_buffer = [0] * 64 * 32  # 64*32
-        output.should_draw = True
+        app_output.display_buffer = [0] * 64 * 32  # 64*32
+        app_window.should_draw = True
 
     # to return from a subroutine, pop the topmost address from the stack
     def _0ZZE(self):
@@ -240,7 +240,7 @@ class CPU:
         self.gpio[self.vx] = r & (self.opcode & 0x00FF)
         self.gpio[self.vx] &= 0xFF
 
-    def _DZZZ(self, app_memory, app_output):
+    def _DZZZ(self, app_memory, app_output, app_window):
         logging.debug("Draw a sprite")
         # draws a sprite at coordinate (VX, VY) that has a width of 8 pixels
         # and a height of N pixels
@@ -273,7 +273,7 @@ class CPU:
                 else:
                     self.gpio[0xF] = 0
             row += 1
-        self.should_draw = True
+        app_window.should_draw = True
 
     def _EZZZ(self):
         extracted_op = self.opcode & 0xF00F
