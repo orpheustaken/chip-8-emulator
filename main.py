@@ -13,7 +13,7 @@ logging.basicConfig(
     filename="chip-8-emulator.log",
     filemode="a",  # 'a' for append, 'w' for overwrite
     level=logging.DEBUG,  # level of logging
-    format="%(asctime)s - %(levelname)s - %(message)s",
+    format="%(asctime)s - %(levelname)s - %(filename)s - %(lineno)d - %(message)s",
 )
 
 

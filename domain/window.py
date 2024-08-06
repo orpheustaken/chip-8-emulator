@@ -15,9 +15,9 @@ class Window(pyglet.window.Window):
         self.label = pyglet.text.Label(
             "CHIP-8 Emulator",
             font_name="Roboto",
-            font_size=24,
+            font_size=12,
             x=self.width // 2,
-            y=self.height // 2,
+            y=self.height // 1.1,
             anchor_x="center",
             anchor_y="center",
         )
@@ -34,9 +34,12 @@ class Window(pyglet.window.Window):
         self.batch = pyglet.graphics.Batch()
         self.sprites = [2048]
 
-        # fills each output pixel
+        # fills each output pixel in a batch
+        logging.debug("__init__: entering drawing loop")
         for i in range(0, 2048):
             # self.sprites.append(pyglet.sprite.Sprite(self.pixel, batch=self.batch))
+
+            display_buffer[i] = 1
 
             sprite = pyglet.sprite.Sprite(self.pixel, batch=self.batch)
             sprite.x = (i % 64) * 10  # 64 sprites per row, each 10 pixels wide
@@ -67,18 +70,17 @@ class Window(pyglet.window.Window):
             self.clear()
             self.label.draw()
 
-            self.pixel = pyglet.image.SolidColorImagePattern(color=(255, 255, 0, 255)).create_image(10, 10)
+            self.pixel = pyglet.image.SolidColorImagePattern(color=(48, 48, 48, 255)).create_image(10, 10)
 
+            logging.debug("on_draw: entering drawing loop")
             for i in range(0, 2048):
                 if self.display_buffer[i] == 1:
-                    # self.sprites[i].x = (i % 64) * 10
-                    # self.sprites[i].y = 310 - ((i / 64) * 10)
-                    # self.sprites[i].batch = self.batch
                     sprite = pyglet.sprite.Sprite(self.pixel, batch=self.batch)
                     sprite.x = (i % 64) * 10  # 64 sprites per row, each 10 pixels wide
                     sprite.y = (i // 64) * 10  # each new row starts at y = (row number) * 10
                     self.sprites.append(sprite)
 
+            # draw in batches
             self.batch.draw()
             self.flip()
             self.should_draw = False
