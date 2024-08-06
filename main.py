@@ -12,7 +12,7 @@ from domain.window import Window
 logging.basicConfig(
     filename="chip-8-emulator.log",
     filemode="a",  # 'a' for append, 'w' for overwrite
-    level=logging.INFO,  # level of logging
+    level=logging.DEBUG,  # level of logging
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
