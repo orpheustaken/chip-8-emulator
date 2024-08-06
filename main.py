@@ -24,7 +24,7 @@ class Main:
         self.app_input = Input()
         self.app_memory = Memory()
         self.app_output = Output()
-        self.app_window = Window(800, 600, "CHIP-8", self.app_input.key_map)
+        self.app_window = Window(800, 600, "CHIP-8", self.app_input.key_map, self.app_output.display_buffer)
 
         self.load_rom(sys.argv[1])
         self.load_fonts()
