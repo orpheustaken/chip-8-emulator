@@ -97,7 +97,7 @@ class CPU:
             0xF029: self._F029,  # FONT
             0xF033: self._F033,  # BCD
             0xF055: self._F055,  # STORE
-            0xF065: self._F065  # FILL
+            0xF065: self._F065   # FILL
         }
 
     #############################################
@@ -148,16 +148,16 @@ class CPU:
     #     self.gpio[self.vx] <<= 1
     #     self.gpio[self.vx] &= 0xFF
 
-    def _EZZ9(self, app_input):
+    def _EZZ9(self):
         logging.debug("Skips the next instruction if the key stored in VX is pressed")
         key = self.gpio[self.vx] & 0xF
-        if app_input.key_inputs[key] == 1:
+        if self.app_input.key_inputs[key] == 1:
             self.pc += 2
 
-    def _EZZA(self, app_input):
+    def _EZZA(self):
         logging.debug("Skips the next instruction if the key stored in VX is not pressed")
         key = self.gpio[self.vx] & 0xF
-        if app_input.key_inputs[key] == 0:
+        if self.app_input.key_inputs[key] == 0:
             self.pc += 2
 
     def _F00D(self):
@@ -379,10 +379,10 @@ class CPU:
         except KeyError:
             logging.error("Unknown instruction: %X" % self.opcode)
 
-    def _EZZE(self, app_input):
+    def _EZZE(self):
         logging.debug("Skips the next instruction if the key stored in VX is pressed")
         key = self.gpio[self.vx] & 0xF
-        if app_input.key_inputs[key] == 1:
+        if self.app_input.key_inputs[key] == 1:
             self.pc += 2
 
     def _EZZ1(self):
@@ -404,9 +404,9 @@ class CPU:
         logging.debug("Sets VX to the value of the delay timer")
         self.gpio[self.vx] = self.delay_timer
 
-    def _FZ0A(self, app_input):
+    def _FZ0A(self):
         logging.debug("A key press is awaited, and then stored in VX")
-        ret = app_input.get_key()
+        ret = self.app_input.get_key()
         if ret >= 0:
             self.gpio[self.vx] = ret
         else:
