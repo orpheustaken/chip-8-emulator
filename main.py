@@ -11,27 +11,28 @@ from domain.window import Window
 
 logging.basicConfig(
     filename="chip-8-emulator.log",
-    filemode="a",  # 'a' for append, 'w' for overwrite
-    level=logging.DEBUG,  # level of logging
-    format="%(asctime)s - %(levelname)s - %(filename)s - %(lineno)d - %(message)s",
+    filemode="w",  # 'a' for append, 'w' for overwrite
+    level=logging.INFO,  # level of logging
+    format="%(asctime)s - %(levelname)s - %(filename)s - %(lineno)d - %(funcName)s - %(message)s",
 )
 
 
 class Main:
     def __init__(self):
-        self.app_cpu = CPU()
         self.app_font = Font()
         self.app_input = Input()
         self.app_memory = Memory()
         self.app_output = Output()
-        self.app_window = Window(800, 600, "CHIP-8", self.app_input.key_map, self.app_output.display_buffer)
+        self.app_window = Window(640, 320, "CHIP-8", self.app_input.key_map, self.app_output.display_buffer,
+                                 self.app_input.key_inputs)
+        self.app_cpu = CPU(self.app_output, self.app_window, self.app_memory, self.app_input)
 
         self.load_rom(sys.argv[1])
         self.load_fonts()
 
-        while not self.has_exit:
+        while not self.app_window.has_exit:
             self.app_window.dispatch_events()
-            self.app_cpu.cycle(self.app_memory, self.app_window, self.app_output)
+            self.app_cpu.cycle()
             self.app_window.on_draw()
 
     def load_rom(self, rom):
@@ -56,11 +57,12 @@ class Main:
         for font in self.app_font.fonts.values():
             self.app_memory.memory.append(font)
 
-    def has_exit(self):
-        pass
-
     def run(self):
-        logging.info("Starting CHIP-8 window...")
+        if not self.app_window.has_exit:
+            logging.info("Starting CHIP-8 window...")
+        else:
+            logging.info("Stopping CHIP-8 Emulator")
+
         self.app_window.run()
 
 

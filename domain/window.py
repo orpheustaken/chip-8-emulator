@@ -2,15 +2,14 @@ import logging
 
 import pyglet
 
-from pyglet import shapes
-
 
 # TODO: there are more abstract methods from pyglet's superclass to be implemented
 class Window(pyglet.window.Window):
-    def __init__(self, width, height, title, keys, display_buffer):
+    def __init__(self, width, height, title, keys, display_buffer, key_inputs):
         super().__init__(width, height, title)
 
         self.display_buffer = display_buffer
+        self.key_inputs = key_inputs
 
         self.label = pyglet.text.Label(
             "CHIP-8 Emulator",
@@ -27,24 +26,16 @@ class Window(pyglet.window.Window):
         self.key_wait = False
 
         # pseudo-pixelwise drawing with 10x10 boxes
-        self.pixel = pyglet.resource.image('assets/pixel.png')
+        self.pixel = pyglet.image.SolidColorImagePattern(color=(255, 255, 255, 255)).create_image(10, 10)
         self.buzz = pyglet.resource.media('assets/buzz.wav', streaming=False)
 
         # "pixel" buffer
         self.batch = pyglet.graphics.Batch()
-        self.sprites = [2048]
+        self.sprites = []
 
         # fills each output pixel in a batch
-        logging.debug("__init__: entering drawing loop")
         for i in range(0, 2048):
-            # self.sprites.append(pyglet.sprite.Sprite(self.pixel, batch=self.batch))
-
-            display_buffer[i] = 1
-
-            sprite = pyglet.sprite.Sprite(self.pixel, batch=self.batch)
-            sprite.x = (i % 64) * 10  # 64 sprites per row, each 10 pixels wide
-            sprite.y = (i // 64) * 10  # each new row starts at y = (row number) * 10
-            self.sprites.append(sprite)
+            self.sprites.append(pyglet.sprite.Sprite(self.pixel, batch=self.batch))
 
         self.KEY_MAP = {
             pyglet.window.key._1: list(keys.values())[0],
@@ -68,17 +59,17 @@ class Window(pyglet.window.Window):
     def on_draw(self):
         if self.should_draw:
             self.clear()
-            self.label.draw()
+            # self.label.draw()
 
-            self.pixel = pyglet.image.SolidColorImagePattern(color=(48, 48, 48, 255)).create_image(10, 10)
-
-            logging.debug("on_draw: entering drawing loop")
+            logging.debug("Window: entering drawing loop")
             for i in range(0, 2048):
                 if self.display_buffer[i] == 1:
-                    sprite = pyglet.sprite.Sprite(self.pixel, batch=self.batch)
-                    sprite.x = (i % 64) * 10  # 64 sprites per row, each 10 pixels wide
-                    sprite.y = (i // 64) * 10  # each new row starts at y = (row number) * 10
-                    self.sprites.append(sprite)
+                    if self.display_buffer[i] == 1:
+                        self.sprites[i].x = (i % 64) * 10
+                        self.sprites[i].y = 310 - ((i / 64) * 10)
+                        self.sprites[i].batch = self.batch
+                else:
+                    self.sprites[i].batch = None
 
             # draw in batches
             self.batch.draw()
@@ -89,20 +80,20 @@ class Window(pyglet.window.Window):
         pyglet.app.exit()
         return super().on_close()
 
-    def dispatch_events(self):
-        pass
-
     def on_key_press(self, symbol, modifiers):
-        if symbol == pyglet.window.key.SPACE:
-            logging.debug("Space pressed: Drawing window")
-            self.should_draw = True
 
-        if symbol == pyglet.window.key.ENTER:
-            logging.debug("Enter pressed: Cleaning window")
-            self.clear()
+        logging.info("Key pressed: " + hex(symbol))
+        if symbol in self.KEY_MAP.keys():
+            self.key_inputs[self.KEY_MAP[symbol]] = 1
+            if self.key_wait:
+                self.key_wait = False
+        else:
+            super().on_key_press(symbol, modifiers)
 
     def on_key_release(self, symbol, modifiers):
-        pass
+        logging.info("Key released: " + hex(symbol))
+        if symbol in self.KEY_MAP.keys():
+            self.key_inputs[self.KEY_MAP[symbol]] = 0
 
     @staticmethod
     def run():

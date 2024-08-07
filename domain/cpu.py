@@ -18,8 +18,12 @@ import random
 
 
 class CPU:
-    def __init__(self):
-        super().__init__()
+    def __init__(self, app_output, app_window, app_memory, app_input):
+        self.app_output = app_output
+        self.app_window = app_window
+        self.app_memory = app_memory
+        self.app_input = app_input
+
         # 16 general purpose 8-bit registers, also referred as Vx where x is a hexadecimal digit (0 through F)
         self.gpio = [0] * 16
 
@@ -56,6 +60,14 @@ class CPU:
             0x6000: self._6ZZZ,
             0x7000: self._7ZZZ,
             0x8000: self._8ZZZ,
+            # 0x8001: self._8ZZ1,  # OR
+            # 0x8002: self._8ZZ2,  # AND
+            # 0x8003: self._8ZZ3,  # XOR
+            # 0x8004: self._8ZZ4,  # ADD
+            # 0x8005: self._8ZZ5,  # SUB
+            # 0x8006: self._8ZZ6,  # SHR
+            # 0x8007: self._8ZZ7,  # SUBN
+            # 0x800E: self._8ZZE,  # SHL
             0x8FF0: self._8ZZ0,
             0x8FF1: self._8ZZ1,
             0x8FF2: self._8ZZ2,
@@ -71,35 +83,128 @@ class CPU:
             0xC000: self._CZZZ,
             0xD000: self._DZZZ,
             0xE000: self._EZZZ,
+            0xE009: self._EZZ9,  # SKP
+            0xE00A: self._EZZA,  # SKNP
             0xE00E: self._EZZE,
             0xE001: self._EZZ1,
             0xF000: self._FZZZ,
+            0xF00D: self._F00D,  # KEYPAD
             0xF007: self._FZ07,
             0xF00A: self._FZ0A,
             0xF015: self._FZ15,
             0xF018: self._FZ18,
-            0xF01E: self._FZ1E,
-            0xF029: self._FZ29,
-            0xF033: self._FZ33,
-            0xF055: self._FZ55,
-            0xF065: self._FZ65,
+            0xF01E: self._F01E,  # ADD_I
+            0xF029: self._F029,  # FONT
+            0xF033: self._F033,  # BCD
+            0xF055: self._F055,  # STORE
+            0xF065: self._F065  # FILL
         }
 
     #############################################
     #           START OF INSTRUCTIONS           #
     #############################################
 
+    # def _8ZZ1(self):
+    #     logging.debug("Sets VX to VX OR VY")
+    #     self.gpio[self.vx] |= self.gpio[self.vy]
+    #     self.gpio[self.vx] &= 0xFF
+    #
+    # def _8ZZ2(self):
+    #     logging.debug("Sets VX to VX AND VY")
+    #     self.gpio[self.vx] &= self.gpio[self.vy]
+    #     self.gpio[self.vx] &= 0xFF
+    #
+    # def _8ZZ3(self):
+    #     logging.debug("Sets VX to VX XOR VY")
+    #     self.gpio[self.vx] ^= self.gpio[self.vy]
+    #     self.gpio[self.vx] &= 0xFF
+    #
+    # def _8ZZ4(self):
+    #     logging.debug("Adds VY to VX; VF is set to 1 when there's a carry, and to 0 when there isn't")
+    #     result = self.gpio[self.vx] + self.gpio[self.vy]
+    #     self.gpio[0xF] = 1 if result > 0xFF else 0
+    #     self.gpio[self.vx] = result & 0xFF
+    #
+    # def _8ZZ5(self):
+    #     logging.debug("Subtracts VY from VX; VF is set to 0 when there's a borrow, and 1 when there isn't")
+    #     self.gpio[0xF] = 0 if self.gpio[self.vy] > self.gpio[self.vx] else 1
+    #     self.gpio[self.vx] = (self.gpio[self.vx] - self.gpio[self.vy]) & 0xFF
+    #
+    # def _8ZZ6(self):
+    #     logging.debug(
+    #         "Shifts VX right by one; VF is set to the value of the least significant bit of VX before the shift")
+    #     self.gpio[0xF] = self.gpio[self.vx] & 0x01
+    #     self.gpio[self.vx] >>= 1
+    #
+    # def _8ZZ7(self):
+    #     logging.debug("Sets VX to VY minus VX; VF is set to 0 when there's a borrow, and 1 when there isn't")
+    #     self.gpio[0xF] = 0 if self.gpio[self.vx] > self.gpio[self.vy] else 1
+    #     self.gpio[self.vx] = (self.gpio[self.vy] - self.gpio[self.vx]) & 0xFF
+    #
+    # def _8ZZE(self):
+    #     logging.debug(
+    #         "Shifts VX left by one; VF is set to the value of the most significant bit of VX before the shift")
+    #     self.gpio[0xF] = (self.gpio[self.vx] & 0x80) >> 7
+    #     self.gpio[self.vx] <<= 1
+    #     self.gpio[self.vx] &= 0xFF
+
+    def _EZZ9(self, app_input):
+        logging.debug("Skips the next instruction if the key stored in VX is pressed")
+        key = self.gpio[self.vx] & 0xF
+        if app_input.key_inputs[key] == 1:
+            self.pc += 2
+
+    def _EZZA(self, app_input):
+        logging.debug("Skips the next instruction if the key stored in VX is not pressed")
+        key = self.gpio[self.vx] & 0xF
+        if app_input.key_inputs[key] == 0:
+            self.pc += 2
+
+    def _F00D(self):
+        logging.debug("Sets VX to the value of the delay timer")
+        self.gpio[self.vx] = self.delay_timer
+
+    def _F01E(self):
+        logging.debug("Adds VX to I; VF is set to 1 if overflow, 0 otherwise")
+        self.index += self.gpio[self.vx]
+        self.gpio[0xF] = 1 if self.index > 0xFFF else 0
+        self.index &= 0xFFF
+
+    def _F029(self):
+        logging.debug("Sets I to the location of the sprite for the character in VX")
+        self.index = (self.gpio[self.vx] * 5) & 0xFFF
+
+    def _F033(self):
+        logging.debug("Stores the binary-coded decimal representation of VX")
+        value = self.gpio[self.vx]
+        self.app_memory.memory[self.index] = value // 100
+        self.app_memory.memory[self.index + 1] = (value // 10) % 10
+        self.app_memory.memory[self.index + 2] = value % 10
+
+    def _F055(self):
+        logging.debug("Stores V0 to VX in memory starting at address I")
+        for i in range(self.vx + 1):
+            self.app_memory.memory[self.index + i] = self.gpio[i]
+        self.index += self.vx + 1
+
+    def _F065(self):
+        logging.debug("Fills V0 to VX with values from memory starting at address I")
+        for i in range(self.vx + 1):
+            self.gpio[i] = self.app_memory.memory[self.index + i]
+        self.index += self.vx + 1
+
     def _0ZZZ(self):
         extracted_op = self.opcode & 0xF0FF
         try:
             self.funcmap[extracted_op]()
+            logging.debug("Found opcode: %X" % self.opcode)
         except KeyError:
-            print("Unknown instruction: %X" % self.opcode)
+            logging.error("Unknown instruction: %X" % self.opcode)
 
-    def _0ZZ0(self, app_output, app_window):
+    def _0ZZ0(self):
         logging.debug("Clears the screen")
-        app_output.display_buffer = [0] * 64 * 32  # 64*32
-        app_window.should_draw = True
+        self.app_output.display_buffer = [0] * 64 * 32  # 64*32
+        self.app_window.should_draw = True
 
     # to return from a subroutine, pop the topmost address from the stack
     def _0ZZE(self):
@@ -146,7 +251,7 @@ class CPU:
         try:
             self.funcmap[extracted_op]()
         except KeyError:
-            print("Unknown instruction: %X" % self.opcode)
+            logging.error("Unknown instruction: %X" % self.opcode)
 
     def _8ZZ0(self):
         logging.debug("Sets VX to the value of VY")
@@ -240,24 +345,16 @@ class CPU:
         self.gpio[self.vx] = r & (self.opcode & 0x00FF)
         self.gpio[self.vx] &= 0xFF
 
-    def _DZZZ(self, app_memory, app_output, app_window):
-        logging.debug("Draw a sprite")
-        # draws a sprite at coordinate (VX, VY) that has a width of 8 pixels
-        # and a height of N pixels
-        # each row of 8 pixels is read as bit-coded
-        # (with the most significant bit of each byte displayed on the left)
-        # starting from memory location I; I value doesn't change after the
-        # execution of this instruction
-        # as described above, VF is set to 1
-        # if any screen pixels are flipped from set to unset when the sprite
-        # is drawn, and to 0 if that doesn't happen
-        self.gpio[0xF] = 0
-        x = self.gpio[self.vx] & 0xFF
-        y = self.gpio[self.vy] & 0xFF
-        height = self.opcode & 0x000F
-        row = 0
-        while row < height:
-            curr_row = app_memory.memory[row + self.index]
+    def _DZZZ(self):
+        logging.debug("Draws sprites to the output")
+
+        self.gpio[0xf] = 0
+        x = self.gpio[self.vx] & 0xff
+        y = self.gpio[self.vy] & 0xff
+        height = self.opcode & 0x000f
+
+        for row in range(height):
+            curr_row = self.app_memory.memory[row + self.index]
             pixel_offset = 0
             while pixel_offset < 8:
                 loc = x + pixel_offset + ((y + row) * 64)
@@ -267,20 +364,20 @@ class CPU:
                     continue
                 mask = 1 << 8 - pixel_offset
                 curr_pixel = (curr_row & mask) >> (8 - pixel_offset)
-                app_output.display_buffer[loc] ^= curr_pixel
-                if app_output.display_buffer[loc] == 0:
-                    self.gpio[0xF] = 1
+                self.app_output.display_buffer[loc] ^= curr_pixel
+                if self.app_output.display_buffer[loc] == 0:
+                    self.gpio[0xf] = 1
                 else:
-                    self.gpio[0xF] = 0
-            row += 1
-        app_window.should_draw = True
+                    self.gpio[0xf] = 0
+
+        self.app_window.should_draw = True
 
     def _EZZZ(self):
         extracted_op = self.opcode & 0xF00F
         try:
             self.funcmap[extracted_op]()
         except KeyError:
-            print("Unknown instruction: %X" % self.opcode)
+            logging.error("Unknown instruction: %X" % self.opcode)
 
     def _EZZE(self, app_input):
         logging.debug("Skips the next instruction if the key stored in VX is pressed")
@@ -288,12 +385,12 @@ class CPU:
         if app_input.key_inputs[key] == 1:
             self.pc += 2
 
-    def _EZZ1(self, app_input):
+    def _EZZ1(self):
         logging.debug(
             "Skips the next instruction if the key stored in VX isn't pressed"
         )
         key = self.gpio[self.vx] & 0xF
-        if app_input.key_inputs[key] == 0:
+        if self.app_input.key_inputs[key] == 0:
             self.pc += 2
 
     def _FZZZ(self):
@@ -301,7 +398,7 @@ class CPU:
         try:
             self.funcmap[extracted_op]()
         except KeyError:
-            print("Unknown instruction: %X" % self.opcode)
+            logging.error("Unknown instruction: %X" % self.opcode)
 
     def _FZ07(self):
         logging.debug("Sets VX to the value of the delay timer")
@@ -338,37 +435,40 @@ class CPU:
         # characters 0-F (in hexadecimal) are represented by a 4x5 font
         self.index = (5 * (self.gpio[self.vx])) & 0xFFF
 
-    def _FZ33(self, app_memory):
+    def _FZ33(self):
         logging.debug("Store a number as BCD")
         # stores the binary-coded decimal representation of VX, with the
         # most significant of three digits at the address in I, the middle
         # digit at I plus 1, and the least significant digit at I plus 2
-        app_memory.memory[self.index] = self.gpio[self.vx] / 100
-        app_memory.memory[self.index + 1] = (self.gpio[self.vx] % 100) / 10
-        app_memory.memory[self.index + 2] = self.gpio[self.vx] % 10
+        self.app_memory.memory[self.index] = self.gpio[self.vx] / 100
+        self.app_memory.memory[self.index + 1] = (self.gpio[self.vx] % 100) / 10
+        self.app_memory.memory[self.index + 2] = self.gpio[self.vx] % 10
 
-    def _FZ55(self, app_memory):
+    def _FZ55(self):
         logging.debug("Stores V0 to VX in memory starting at address I")
         for i in range(self.vx):
-            app_memory.memory[self.index + i] = self.gpio[i]
+            self.app_memory.memory[self.index + i] = self.gpio[i]
         self.index += self.vx + 1
 
-    def _FZ65(self, app_memory):
+    def _FZ65(self):
         logging.debug("Fills V0 to VX with values from memory starting at address I")
         for i in range(self.vx):
-            self.gpio[i] = app_memory.memory[self.index + i]
+            self.gpio[i] = self.app_memory.memory[self.index + i]
         self.index += self.vx + 1
 
     #############################################
     #            END OF INSTRUCTIONS            #
     #############################################
 
-    def cycle(self, app_memory, app_window, app_output):
-        # each opcode in CHIP8 is 2 bytes long.
+    def cycle(self):
+        logging.debug("Current opcode: %X" % self.opcode)
+
+        # each opcode in CHIP8 is 2 bytes long
         # the program counter points to the current opcode to be processed
         # after getting the op and processing it, the program counter increments by 2 bytes
-        # then the process repeats until the program ends.
-        self.opcode = app_memory.memory[self.pc]
+        # then the process repeats until the program ends
+
+        self.opcode = (self.app_memory.memory[self.pc] << 8) | self.app_memory.memory[self.pc + 1]
 
         self.vx = (self.opcode & 0x0F00) >> 8
         self.vy = (self.opcode & 0x00F0) >> 4
@@ -388,7 +488,7 @@ class CPU:
             # call the associated method
             self.funcmap[extracted_op]()
         except KeyError:
-            print("Unknown instruction: %X" % self.opcode)
+            logging.error("Unknown instruction: %X" % self.opcode)
 
         # decrement timers
         if self.delay_timer > 0:
@@ -396,6 +496,5 @@ class CPU:
         if self.sound_timer > 0:
             self.sound_timer -= 1
 
-        if self.sound_timer == 0:
-            # TODO: play a sound here with pyglet
-            pass
+        if self.sound_timer != 0:
+            self.app_window.buzz.play()
