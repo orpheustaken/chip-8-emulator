@@ -5,6 +5,11 @@
 
 [![Black](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/ambv/black)
 
+Usage
+```
+python main.py <rom_img_path>
+```
+
 <div align="center">
   <img src=https://github.com/user-attachments/assets/a9dd9f16-bbf1-40f4-9fcd-b544741637f1>
   <img src=https://github.com/user-attachments/assets/cf2323dc-f714-4ff8-97d4-6f22083e7970>
