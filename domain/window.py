@@ -11,15 +11,15 @@ class Window(pyglet.window.Window):
         self.display_buffer = display_buffer
         self.key_inputs = key_inputs
 
-        self.label = pyglet.text.Label(
-            "CHIP-8 Emulator",
-            font_name="Roboto",
-            font_size=12,
-            x=self.width // 2,
-            y=self.height // 1.1,
-            anchor_x="center",
-            anchor_y="center",
-        )
+        # self.label = pyglet.text.Label(
+        #     "CHIP-8 Emulator",
+        #     font_name="Roboto",
+        #     font_size=12,
+        #     x=self.width // 2,
+        #     y=self.height // 1.1,
+        #     anchor_x="center",
+        #     anchor_y="center",
+        # )
 
         # both should false by default
         self.should_draw = False
