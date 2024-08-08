@@ -5,10 +5,14 @@
 
 [![Black](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/ambv/black)
 
+There certainly are improvements to be made here, but I am satisfied with the current state of this project and I was able to learn a lot as this was my first emulator. For now I'll just leave this as is.
+
 Usage
 ```
 python main.py <rom_img_path>
 ```
+
+Note: Install the `requirements.txt` dependencies first. I've used [Pyglet](https://github.com/pyglet/pyglet) to abstract all the OpenGL boilerplate.
 
 <div align="center">
   <img src=https://github.com/user-attachments/assets/a9dd9f16-bbf1-40f4-9fcd-b544741637f1>
